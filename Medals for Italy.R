@@ -1,3 +1,40 @@
+#Load libraries
+library(tidytuesdayR)
+library(tidyverse)
+library(plotly)
+library(lubridate)
+library(chron)
+library(leaflet)
+library(tidygeocoder)
+library(ggmap)
+library(data.table)
+library(janitor)
+library(glue)
+
+#Load data
+tuesdata <- tidytuesdayR::tt_load(2021, week = 31)
+
+olympics <- tuesdata$olympics
+olympics <- clean_names(olympics)
+#Get Lat Long of olympic venues
+lat_long <-  tidygeocoder::geo(city = unique(olympics$city), method = "osm")
+#join the new lat long table to the original data
+olympics <- left_join(olympics, lat_long)
+
+
+#create gold silver and bronze varialbes plus edition (i.e. city + year)
+olympics <- olympics %>% 
+  mutate(gold = if_else(medal == "Gold", 1, 0)) %>% 
+  mutate(silver = if_else(medal == "Silver", 1, 0)) %>% 
+  mutate(bronze = if_else(medal == "Bronze", 1, 0)) %>% 
+  mutate(tot_med = ifelse(is.na(medal),0,1)) %>% 
+  mutate(edition = paste(city,' ',year))
+
+#set medal colours for charts
+gold <- '#FFFF00'
+silver <- 'RGB 192, 192, 192'
+bronze <- 'RGB 205, 127, 50'
+
 
 
 
@@ -16,19 +53,9 @@ italy_medals %>%
   layout(barmode = 'stack', showlegend = FALSE, yaxis = list(title = 'Medals'))
 
 
-italy_london <- olympics %>% 
-  filter(noc == "ITA", edition == "London   2012") 
-  filter(edition == "London   2012")
+
   
-itaMed <- olympics %>% 
-  filter(noc == "ITA", tot_med == 1)  %>% 
-  group_by(edition, year, season, event) %>% 
-  count(gold, silver, bronze) %>% 
-  arrange(desc(year))
-  tibble()
-
-itaMed$edition <- factor(itaMed$edition, levels = unique(itaMed$edition))
-
+#use count instead of sum to avoid doublecounting team sports
 ita_medals_summer <- olympics %>% 
   filter(noc == "ITA", tot_med == 1, season == 'Summer')  %>% 
   group_by(edition, year, event) %>% 
@@ -36,11 +63,12 @@ ita_medals_summer <- olympics %>%
   arrange((year))
 tibble()
 
+#fix x axis
 ita_medals_summer$edition <- factor(ita_medals_summer$edition, 
                                     levels = unique(ita_medals_summer$edition))
 
 
-
+#plot
 ita_medals_summer %>% 
   plot_ly(x = ~edition) %>% 
   add_bars(y = ~bronze, marker = list(color = bronze), name = 'Bronze') %>% 
@@ -58,13 +86,5 @@ ita_medals_summer %>%
 
 
 
-itaMed %>% 
-  filter(season == 'Summer') %>% 
-  
-  plot_ly(x = ~edition) %>% 
-  add_bars(y = ~bronze, marker = list(color = bronze), name = 'Bronze') %>% 
-  add_bars(y = ~silver, marker = list(color = silver), name = 'Silver') %>% 
-  add_bars(y = ~gold, marker = list(color = gold), name = 'Gold') %>% 
-  layout(barmode = 'stack', showlegend = FALSE, yaxis = list(title = 'Medals'))
 
 
