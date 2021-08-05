@@ -1,0 +1,102 @@
+---
+title: "Olympics Map"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(tidytuesdayR)
+library(tidyverse)
+library(plotly)
+library(lubridate)
+library(chron)
+library(leaflet)
+library(tidygeocoder)
+library(ggmap)
+library(data.table)
+library(janitor)
+library(glue)
+
+```
+
+```{r data, include = FALSE}
+#Load data
+tuesdata <- tidytuesdayR::tt_load(2021, week = 31)
+
+olympics <- tuesdata$olympics
+olympics <- clean_names(olympics)
+#Get Lat Long of olympic venues
+lat_long <-  tidygeocoder::geo(city = unique(olympics$city), method = "osm")
+#join the new lat long table to the original data
+olympics <- left_join(olympics, lat_long)
+
+
+#create gold silver and bronze varialbes plus edition (i.e. city + year)
+olympics <- olympics %>% 
+  mutate(gold = if_else(medal == "Gold", 1, 0)) %>% 
+  mutate(silver = if_else(medal == "Silver", 1, 0)) %>% 
+  mutate(bronze = if_else(medal == "Bronze", 1, 0)) %>% 
+  mutate(tot_med = ifelse(is.na(medal),0,1)) %>% 
+  mutate(edition = paste(city,' ',year))
+
+  
+  
+#Get total medals by nations by edition
+medals_by_edition <- olympics %>% 
+  group_by(edition, noc, lat, long, season) %>% 
+  summarise(medals = sum(tot_med))
+
+#get markers to differentiate summer and winter olympics
+icons <- iconList(
+  Winter = makeIcon(awesomeIcons(icon = "snow-outline", library = "ion")),
+  Summer = makeIcon(awesomeIcons(icon = "sunny-outline", library = "ion"))
+)
+
+Winter_icon <- awesomeIcons(icon = "snow-outline", library = "ion", 
+                            iconColor = 'white')
+Summer_icon <- awesomeIcons(icon = "sunny-outline", library = "ion",
+                            iconColor = 'white')
+
+```
+
+
+Summer
+=============================================
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Medals by Olympic Games edition
+
+```{r}
+m <- medals_by_edition %>% 
+  filter(noc == "ITA", season == "Summer") %>%
+  mutate(med_ed = glue("Edition: {edition}; Medals: {medals}")) %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addAwesomeMarkers(~long, ~lat, label = ~med_ed, 
+                    icon = Summer_icon)
+m
+```
+Winter
+===============================
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Medals by Olympic Games edition
+
+```{r}
+m <- medals_by_edition %>% 
+  filter(noc == "ITA", season == "Summer") %>%
+  mutate(med_ed = glue("Edition: {edition}; Medals: {medals}")) %>% 
+  leaflet() %>% 
+  addTiles() %>% 
+  addAwesomeMarkers(~long, ~lat, label = ~med_ed, 
+                    icon = Summer_icon)
+m
+```
+
