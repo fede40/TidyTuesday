@@ -54,7 +54,7 @@ gold_by_event_by_nation %>%
   layout(title = list(text = "Olympic spirit", yanchor = "top"),
          barmode = 'stack',
          showlegend = FALSE, 
-         yaxis = list(title = 'Gold medal events'),
+         yaxis = list(title = 'Gold medal sports'),
          xaxis = list(title = 'Nation'),
          plot_bgcolor = "#f7f1df",
          paper_bgcolor = '#f7f1df') %>% 
