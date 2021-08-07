@@ -1,14 +1,8 @@
 library(tidytuesdayR)
 library(tidyverse)
 library(plotly)
-library(lubridate)
-library(chron)
-library(leaflet)
-library(tidygeocoder)
-library(ggmap)
 library(data.table)
 library(janitor)
-library(glue)
 
 #Load data
 tuesdata <- tidytuesdayR::tt_load(2021, week = 31)
@@ -50,6 +44,7 @@ gold_by_event_by_nation <- medals_summer %>%
   count(gold) %>% 
   filter(gold == 1)
 
+#plot
 gold_by_event_by_nation %>% 
   group_by(noc) %>% 
   summarise(gold = sum(gold)) %>%
