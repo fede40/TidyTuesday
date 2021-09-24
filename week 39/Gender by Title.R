@@ -40,12 +40,12 @@ p3 <- actrs_grp %>%
         barmode = 'stack',
          showlegend = TRUE, 
          yaxis = list(title = 'Total Awards'),
-         xaxis = Noax,
+         xaxis = list(title = 'Series'),
          legend = list( x = .85, y = .85, size = 10),
          plot_bgcolor = "#f7f1df",
          paper_bgcolor = '#f7f1df') %>% 
   add_annotations(xref = 'paper', yref = 'paper',
-                  x = .95, y = -.85,
+                  x = .95, y = -.55,
                   text = paste('Data Viz: @_fede40 <br>| Data Source: Emmys'),
                   font = list(family = 'Arial', size = 9.5, color = "#00000"),
                   showarrow = FALSE)
