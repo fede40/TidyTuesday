@@ -41,7 +41,7 @@ p3 <- actrs_grp %>%
          showlegend = TRUE, 
          yaxis = list(title = 'Total Awards'),
          xaxis = list(title = 'Series'),
-         legend = list( x = .85, y = .85, size = 10),
+         legend = list( x = .85, y = .95, size = 10),
          plot_bgcolor = "#f7f1df",
          paper_bgcolor = '#f7f1df') %>% 
   add_annotations(xref = 'paper', yref = 'paper',
